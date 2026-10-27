@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhotoFrame Studio - Auto EXIF Watermark</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Header Bar -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="app-logo">
+        <span class="logo-icon">📸</span>
+        <span class="logo-title">PhotoFrame <strong>Studio</strong></span>
+        <span class="badge">PRO</span>
+      </div>
+    </div>
+    <div class="header-center">
+      <span class="header-tagline">Tự động đọc EXIF • Gắn Frame Watermark Máy ảnh</span>
+    </div>
+    <div class="header-right">
+      <button class="btn btn-secondary btn-sm" id="addFolderBtn" title="Chọn thư mục chứa ảnh">
+        📁 Thêm Folder Ảnh
+      </button>
+      <button class="btn btn-primary btn-sm" id="addMoreBtn">
+        + Thêm Ảnh
+      </button>
+      <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
+      <input type="file" id="folderInput" webkitdirectory directory multiple style="display: none;">
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="app-main">
+    <!-- Left Sidebar: Photo Queue -->
+    <aside class="sidebar-left">
+      <div class="sidebar-header">
+        <h3>Photos <span id="photoCount" class="count-badge">(0)</span></h3>
+        <button id="clearAllBtn" class="btn-link" title="Xóa tất cả ảnh">Xóa hết</button>
+      </div>
+
+      <div class="photo-list" id="photoList">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-outline w-100" onclick="document.getElementById('fileInput').click()">
+          + Thêm Ảnh Khác
+        </button>
+      </div>
+    </aside>
+
+    <!-- Center Canvas Preview -->
+    <section class="stage-center" id="dropZone">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">📷</div>
+        <h2>Kéo thả ảnh hoặc chọn Folder vào đây</h2>
+        <p>Tự động đọc thông số EXIF (Model, Lens, Tốc, Khẩu, ISO, Ngày giờ) và đóng khung chuyên nghiệp.</p>
+        <div class="empty-actions">
+          <button class="btn btn-primary btn-lg" onclick="document.getElementById('fileInput').click()">
+            Chọn Ảnh Từ Máy
+          </button>
+          <button class="btn btn-secondary btn-lg" onclick="document.getElementById('folderInput').click()">
+            Chọn Cả Folder
+          </button>
+        </div>
+        <div class="empty-tips">
+          <span>✓ Hỗ trợ JPEG, PNG, WebP, HEIC</span>
+          <span>✓ Xử lý 100% Offline trên máy Mac</span>
+          <span>✓ Giữ nguyên độ phân giải gốc</span>
+        </div>
+      </div>
+
+      <div class="preview-wrapper" id="previewContainer">
+        <canvas id="previewCanvas"></canvas>
+      </div>
+
+      <!-- Loading overlay -->
+      <div class="loading-overlay" id="loadingIndicator" style="display: none;">
+        <div class="spinner"></div>
+        <div class="loading-text">Đang xử lý ảnh...</div>
+      </div>
+    </section>
+
+    <!-- Right Sidebar: Settings & Styles -->
+    <aside class="sidebar-right">
+      <div class="sidebar-section">
+        <label class="section-label">LAYOUT STYLE</label>
+        <div class="style-grid">
+          <button class="style-btn active" data-style="iphone">
+            <span class="style-name">iPhone Style</span>
+            <span class="style-desc">Viền đáy trắng tối giản</span>
+          </button>
+          <button class="style-btn" data-style="studio">
+            <span class="style-name">Studio Mat (Apple Card)</span>
+            <span class="style-desc">Viền Gallery trắng • 3 dòng F/S/ISO</span>
+          </button>
+          <button class="style-btn" data-style="leica_dark">
+            <span class="style-name">Leica In-Photo (Hình 1)</span>
+            <span class="style-desc">Watermark trực tiếp trong ảnh • Căn giữa</span>
+          </button>
+          <button class="style-btn" data-style="leica_white">
+            <span class="style-name">Leica White Mat (Hình 2)</span>
+            <span class="style-desc">Khung trắng Gallery • Logo & thông số căn giữa</span>
+          </button>
+          <button class="style-btn" data-style="blur">
+            <span class="style-name">Cinematic Blur</span>
+            <span class="style-desc">Nền mờ + Bo góc + Đổ bóng</span>
+          </button>
+          <button class="style-btn" data-style="liveview">
+            <span class="style-name">Camera Live View</span>
+            <span class="style-desc">HUD kính ngắm máy ảnh</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-header-row">
+          <label class="section-label">TINH CHỈNH BỐ CỤC</label>
+          <button id="resetSettingsBtn" class="btn-reset" title="Đặt lại các thông số về mặc định">
+            Đặt lại mặc định ↺
+          </button>
+        </div>
+
+        <div class="control-row">
+          <div class="control-header">
+            <span>Cỡ chữ (Text Size)</span>
+            <input type="number" id="textSizeInput" class="control-num-input" min="0" max="100" value="50">
+          </div>
+          <input type="range" id="textSize" min="0" max="100" value="50">
+        </div>
+
+        <div class="control-row">
+          <div class="control-header">
+            <span>Độ dày khung (Frame Margin)</span>
+            <input type="number" id="frameMarginInput" class="control-num-input" min="0" max="100" value="40">
+          </div>
+          <input type="range" id="frameMargin" min="0" max="100" value="40">
+        </div>
+
+        <div class="control-row">
+          <div class="control-header">
+            <span>Cỡ logo (Logo Size)</span>
+            <input type="number" id="logoSizeInput" class="control-num-input" min="0" max="100" value="50">
+          </div>
+          <input type="range" id="logoSize" min="0" max="100" value="50">
+        </div>
+
+        <!-- Blur specific settings -->
+        <div id="blurControls" style="display: none;">
+          <div class="control-row">
+            <div class="control-header">
+              <span>Độ mờ nền (Blur)</span>
+              <input type="number" id="bgBlurInput" class="control-num-input" min="0" max="100" value="40">
+            </div>
+            <input type="range" id="bgBlur" min="0" max="100" value="40">
+          </div>
+
+          <div class="control-row">
+            <div class="control-header">
+              <span>Độ sáng nền (Brightness)</span>
+              <input type="number" id="bgBrightnessInput" class="control-num-input" min="0" max="100" value="80">
+            </div>
+            <input type="range" id="bgBrightness" min="0" max="100" value="80">
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <label class="section-label">LOGO THƯƠNG HIỆU</label>
+        <div class="control-row">
+          <select id="brandSelect" class="form-select">
+            <!-- Dynamically populated -->
+          </select>
+        </div>
+        <div class="control-row">
+          <button class="btn btn-secondary w-100" id="selectLogoBtn">
+            Tải lên Logo Tùy chọn (PNG/SVG)
+          </button>
+          <input type="file" id="customLogoInput" accept="image/*" style="display: none;">
+        </div>
+      </div>
+
+      <div class="sidebar-section sidebar-actions">
+        <button class="btn btn-secondary w-100 mb-2" id="downloadCurrentBtn">
+          ⬇ Tải Ảnh Đang Xem
+        </button>
+        <button class="btn btn-primary btn-cta w-100" id="downloadAllBtn">
+          ⚡ Tải Về Tất Cả (Download All)
+        </button>
+      </div>
+    </aside>
+  </main>
+
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
