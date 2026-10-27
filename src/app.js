@@ -539,6 +539,62 @@ class PhotoFrameApp {
   async downloadAll() {
     if (this.photos.length === 0) return;
 
+    // Check if JSZip is available for convenient 1-click batch download
+    if (typeof JSZip !== 'undefined') {
+      try {
+        const zip = new JSZip();
+        const total = this.photos.length;
+
+        for (let i = 0; i < total; i++) {
+          const p = this.photos[i];
+          this.showLoading(true, `Đang kết xuất ảnh gốc (${i + 1}/${total}): ${p.name}...`);
+
+          // Render using 100% full-resolution original camera image
+          const rendered = this.renderer.render(p.img, p.meta, this.settings);
+
+          const blob = await new Promise((resolve) => {
+            rendered.toBlob(resolve, 'image/jpeg', 0.98);
+          });
+
+          if (blob) {
+            const baseName = p.name.replace(/\.[^/.]+$/, '');
+            zip.file(`${baseName}_framed.jpg`, blob);
+          }
+        }
+
+        this.showLoading(true, 'Đang nén toàn bộ ảnh vào file ZIP...');
+
+        const zipBlob = await zip.generateAsync(
+          {
+            type: 'blob',
+            compression: 'DEFLATE',
+            compressionOptions: { level: 5 }
+          },
+          (metadata) => {
+            if (metadata.percent) {
+              this.showLoading(true, `Đang nén file ZIP: ${Math.round(metadata.percent)}%...`);
+            }
+          }
+        );
+
+        // Download single ZIP file
+        const url = URL.createObjectURL(zipBlob);
+        const link = document.createElement('a');
+        const now = new Date();
+        const timestamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
+        link.download = `PhotoFrame_Export_${timestamp}.zip`;
+        link.href = url;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+
+        this.showLoading(false);
+        return;
+      } catch (err) {
+        console.error('Lỗi khi đóng gói ZIP, chuyển sang chế độ tải từng file:', err);
+      }
+    }
+
+    // Fallback if JSZip is not available
     this.showLoading(true, 'Đang xuất toàn bộ ảnh ở chất lượng gốc cao nhất...');
 
     for (let i = 0; i < this.photos.length; i++) {

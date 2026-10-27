@@ -27,7 +27,7 @@ Một công cụ chuyên nghiệp, tốc độ cao chạy trực tiếp trên m�
 
 4. **Tùy biến linh hoạt & Xuất hàng loạt:**
    - Điều chỉnh trực quan qua thanh trượt: Cỡ chữ, Độ dày viền khung, Cỡ logo, Độ mờ nền, Độ sáng nền.
-   - Nút **"Tải về tất cả" (Download All)**: Tự động render full độ phân giải gốc của ảnh (không bị nén hay vỡ hạt) và tải về máy trong chớp mắt.
+   - Nút **"Nén & Tải về tất cả (.zip)"**: Tự động render full độ phân giải gốc của ảnh và đóng gói nén gọn gàng vào 1 file `.zip` duy nhất tải về trong 1 click.
    - **100% Offline & Bảo mật:** Hoạt động hoàn toàn trên máy Mac, không gửi ảnh lên bất kỳ server nào.
 
 ---
@@ -50,9 +50,9 @@ python3 server.py
 ### Cách 3: Chế độ dòng lệnh (CLI Batch Processing)
 Nếu bạn muốn xử lý nhanh cả thư mục ảnh qua Terminal mà không cần mở trình duyệt:
 ```bash
-python3 photoframe.py -i /duong-dan-toi-folder-anh -o ./output -s iphone
+python3 photoframe.py -i /duong-dan-toi-folder-anh -o ./output -s iphone --zip
 # hoặc style blur:
-python3 photoframe.py -i /duong-dan-toi-folder-anh -o ./output -s blur
+python3 photoframe.py -i /duong-dan-toi-folder-anh -o ./output -s blur --zip
 ```
 *(Yêu cầu cài thêm Pillow nếu dùng CLI: `pip3 install pillow`)*.
 
