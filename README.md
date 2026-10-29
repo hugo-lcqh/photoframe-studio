@@ -32,14 +32,30 @@ Một công cụ chuyên nghiệp, tốc độ cao chạy trực tiếp trên m�
 
 ---
 
-## 🚀 Cách sử dụng nhanh nhất trên Mac
+## 🚀 Cách sử dụng
 
-### Cách 1: Click đúp để mở (Tiện lợi nhất)
+### Cách 1: Chạy bằng Docker (Khuyên dùng - Nhanh & Độc lập)
+Khởi chạy ngay lập tức bằng Docker mà không cần cấu hình môi trường:
+```bash
+# Khởi động ở chế độ background:
+docker compose up -d
+
+# Hoặc dùng lệnh docker run trực tiếp:
+docker run -d -p 8080:80 --name photoframe-studio photoframe-studio:latest
+```
+👉 Mở trình duyệt tại: **`http://localhost:8080`**
+
+Dừng ứng dụng:
+```bash
+docker compose down
+```
+
+### Cách 2: Click đúp để mở trên macOS (Tiện lợi nhất)
 1. Mở thư mục dự án trong **Finder**.
 2. **Click đúp** vào file `start.command`.
 3. Ứng dụng sẽ tự động mở ngay trên trình duyệt mặc định của máy Mac (Safari, Chrome, Arc...) tại địa chỉ `http://localhost:8080`.
 
-### Cách 2: Chạy từ Terminal
+### Cách 3: Chạy từ Terminal (Python server)
 Mở Terminal trong thư mục này và gõ:
 ```bash
 ./start.command
@@ -47,7 +63,7 @@ Mở Terminal trong thư mục này và gõ:
 python3 server.py
 ```
 
-### Cách 3: Chế độ dòng lệnh (CLI Batch Processing)
+### Cách 4: Chế độ dòng lệnh (CLI Batch Processing)
 Nếu bạn muốn xử lý nhanh cả thư mục ảnh qua Terminal mà không cần mở trình duyệt:
 ```bash
 python3 photoframe.py -i /duong-dan-toi-folder-anh -o ./output -s iphone --zip
@@ -60,16 +76,20 @@ python3 photoframe.py -i /duong-dan-toi-folder-anh -o ./output -s blur --zip
 
 ## 📂 Cấu trúc mã nguồn
 ```
-jolly-hopper/
-├── index.html         # Giao diện chính ứng dụng Web Local
-├── style.css          # Giao diện phong cách Apple Dark Mode
-├── start.command      # File nhấp đúp để chạy ngay trên macOS
-├── server.py          # Local server Python nhẹ, không phụ thuộc thư viện
-├── photoframe.py      # Script chạy trực tiếp trong Terminal
+photoframe-studio/
+├── Dockerfile          # Cấu hình đóng gói container Docker (Nginx Alpine siêu nhẹ ~26MB)
+├── docker-compose.yml  # File compose khởi chạy 1 lệnh nhanh chóng
+├── default.conf        # Cấu hình Nginx tối ưu cache & Gzip
+├── index.html          # Giao diện chính ứng dụng Web
+├── style.css           # Giao diện phong cách Apple Dark Mode
+├── start.command       # File nhấp đúp để chạy ngay trên macOS
+├── server.py           # Local server Python nhẹ, không phụ thuộc thư viện
+├── photoframe.py       # Script chạy trực tiếp trong Terminal
 ├── src/
-│   ├── app.js         # Quản lý hàng đợi ảnh, kéo thả, xuất file
-│   ├── exif.js        # Parser đọc nhị phân EXIF gốc (Make, Model, Lens, Shutter, ISO...)
-│   ├── renderer.js    # Engine vẽ khung ảnh độ phân giải cao bằng Canvas 2D
-│   └── logos.js       # Bộ logo vector các hãng máy ảnh (Fujifilm, Sony, Canon...)
+│   ├── app.js          # Quản lý hàng đợi ảnh, kéo thả, xuất file & zip
+│   ├── exif.js         # Parser đọc nhị phân EXIF gốc (Make, Model, Lens, Shutter, ISO...)
+│   ├── renderer.js     # Engine vẽ khung ảnh độ phân giải cao bằng Canvas 2D
+│   ├── logos.js        # Bộ logo vector các hãng máy ảnh (Fujifilm, Sony, Canon...)
+│   └── jszip.min.js    # Thư viện đóng gói ZIP offline
 └── README.md
 ```

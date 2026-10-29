@@ -1,0 +1,10 @@
+services:
+  photoframe:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: photoframe-studio:latest
+    container_name: photoframe-studio
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8080}:80"

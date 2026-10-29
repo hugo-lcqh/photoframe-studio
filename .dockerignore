@@ -1,0 +1,13 @@
+.git
+.gitignore
+.dockerignore
+.DS_Store
+__pycache__
+*.py[cod]
+output/
+*.tmp
+*.log
+photoframe.py
+server.py
+start.command
+README.md
